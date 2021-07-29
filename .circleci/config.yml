@@ -2,34 +2,7 @@ version: 2.1
 orbs:
   win: circleci/windows@2.4.0
 jobs:
-  percy-finalize:
-    docker:
-      - image: percyio/agent
-        auth:
-          username: dashautomation
-          password: $DASH_PAT_DOCKERHUB
-    steps:
-      - run: percy finalize --all
-
-  artifacts:
-    docker:
-      - image: circleci/python:3.9.2-buster-node-browsers
-        auth:
-          username: dashautomation
-          password: $DASH_PAT_DOCKERHUB
-        environment:
-          PYVERSION: python39
-    steps:
-      - checkout
-      - run: echo $PYVERSION > ver.txt
-      - restore_cache:
-          key: dep-{{ checksum ".circleci/config.yml" }}-{{ checksum "ver.txt" }}-{{ checksum "requires-dev.txt" }}-{{ checksum "requires-install.txt" }}-{{ checksum "requires-testing.txt" }}
-      - attach_workspace:
-          at: ~/dash
-      - store_artifacts:
-          path: ~/dash/packages
-          destination: /tmp/packages
-
+  
   lint-unit-39: &lint-unit
     working_directory: ~/dash
     docker:
@@ -49,6 +22,7 @@ jobs:
       - run:
           name: ️️🏗️ pip dev requirements
           command: |
+            uname -m
             sudo pip install --upgrade virtualenv --progress-bar off
             python -m venv venv || virtualenv venv && . venv/bin/activate
             pip install -e . --no-cache-dir -r requires-install.txt -r requires-dev.txt -r requires-testing.txt --progress-bar off
@@ -89,6 +63,7 @@ jobs:
       - run:
           name: ️🏗️ pip dev requirements
           command: |
+            uname -m
             sudo pip install --upgrade virtualenv
             python -m venv venv || virtualenv venv && . venv/bin/activate
             sed -i '/dash-/d' requires-install.txt
@@ -140,6 +115,7 @@ jobs:
       - run:
           name: ️️🏗️ build misc
           command: |
+            uname -m
             . venv/bin/activate && pip install --no-cache-dir --upgrade -e . --progress-bar off && mkdir packages
             git clone --depth 1 https://github.com/plotly/dash-table.git
             cd dash-table && npm ci && npm run build && python setup.py sdist && mv dist/* ../packages/ && cd ..
@@ -151,24 +127,7 @@ jobs:
           paths:
             - packages/*.tar.gz
 
-  
-  build-windows-39:
-    working_directory: ~/dash
-    executor:
-      name: win/default
-      shell: bash.exe
-    environment:
-      PYVERSION: python39
-    steps:
-      - checkout
-      - run: echo $PYVERSION > ver.txt
-      - run:
-          name: ️️🏗️ build core
-          command: |
-            pip install --no-cache-dir --upgrade -e .[dev,testing] --progress-bar off
-            cd dash/dash-renderer && renderer build && cd ../../ && python setup.py sdist && mv dist/* packages/
-            git clone --depth 1 https://github.com/plotly/dash-core-components.git
-            cd dash-core-components && npm ci && npm run build && python setup.py sdist && cd ..
+
 
   
   test-39: &test
@@ -223,24 +182,10 @@ workflows:
     jobs:
       - lint-unit-39
       - build-core-39
-      - build-windows-39
       - build-misc-39
       - test-39:
           requires:
             - build-core-39
             - build-misc-39
-      - percy-finalize:
-          requires:
-            - test-39
-      - artifacts:
-          requires:
-            - percy-finalize
-          filters:
-            branches:
-              only:
-                - master
-                - dev
-            tags:
-              only: /v*/
 
  
