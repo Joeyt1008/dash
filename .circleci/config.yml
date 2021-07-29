@@ -25,6 +25,7 @@ jobs:
             python3 -m pip install --upgrade pip
             ls
             pwd
+            git clone https://github.com/plotly/dash
             cd dash
             pip3 install -e . --no-cache-dir -r requires-install.txt -r requires-dev.txt -r requires-testing.txt --progress-bar off
       - save_cache:
