@@ -151,7 +151,26 @@ jobs:
           paths:
             - packages/*.tar.gz
 
+  
+  build-windows-39:
+    working_directory: ~/dash
+    executor:
+      name: win/default
+      shell: bash.exe
+    environment:
+      PYVERSION: python39
+    steps:
+      - checkout
+      - run: echo $PYVERSION > ver.txt
+      - run:
+          name: ️️🏗️ build core
+          command: |
+            pip install --no-cache-dir --upgrade -e .[dev,testing] --progress-bar off
+            cd dash/dash-renderer && renderer build && cd ../../ && python setup.py sdist && mv dist/* packages/
+            git clone --depth 1 https://github.com/plotly/dash-core-components.git
+            cd dash-core-components && npm ci && npm run build && python setup.py sdist && cd ..
 
+  
   test-39: &test
     working_directory: ~/dash
     docker:
