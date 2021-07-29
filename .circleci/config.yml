@@ -71,27 +71,6 @@ jobs:
             . venv/bin/activate
             npm run citest.unit
 
-  lint-unit-36:
-    <<: *lint-unit
-    docker:
-      - image: circleci/python:3.6.13-stretch-node-browsers
-        auth:
-          username: dashautomation
-          password: $DASH_PAT_DOCKERHUB
-        environment:
-          PYLINTRC: .pylintrc
-          PYVERSION: python36
-
-  lint-unit-27:
-    <<: *lint-unit
-    docker:
-      - image: circleci/python:2.7.18-stretch-node-browsers
-        auth:
-          username: dashautomation
-          password: $DASH_PAT_DOCKERHUB
-        environment:
-          PYLINTRC: .pylintrc
-          PYVERSION: python27
 
   build-core-39: &build-core
     working_directory: ~/dash
@@ -131,25 +110,7 @@ jobs:
           paths:
             - packages/*.tar.gz
 
-  build-core-36:
-    <<: *build-core
-    docker:
-      - image: circleci/python:3.6.13-stretch-node-browsers
-        auth:
-          username: dashautomation
-          password: $DASH_PAT_DOCKERHUB
-        environment:
-          PYVERSION: python36
 
-  build-core-27:
-    <<: *build-core
-    docker:
-      - image: circleci/python:2.7.18-stretch-node-browsers
-        auth:
-          username: dashautomation
-          password: $DASH_PAT_DOCKERHUB
-        environment:
-          PYVERSION: python27
 
   build-misc-39: &build-misc
     working_directory: ~/dash
@@ -190,43 +151,6 @@ jobs:
           paths:
             - packages/*.tar.gz
 
-  build-misc-36:
-    <<: *build-misc
-    docker:
-      - image: circleci/python:3.6.13-stretch-node-browsers
-        auth:
-          username: dashautomation
-          password: $DASH_PAT_DOCKERHUB
-        environment:
-          PYVERSION: python36
-
-  build-misc-27:
-    <<: *build-misc
-    docker:
-      - image: circleci/python:2.7.18-stretch-node-browsers
-        auth:
-          username: dashautomation
-          password: $DASH_PAT_DOCKERHUB
-        environment:
-          PYVERSION: python27
-
-  build-windows-39:
-    working_directory: ~/dash
-    executor:
-      name: win/default
-      shell: bash.exe
-    environment:
-      PYVERSION: python39
-    steps:
-      - checkout
-      - run: echo $PYVERSION > ver.txt
-      - run:
-          name: ️️🏗️ build core
-          command: |
-            pip install --no-cache-dir --upgrade -e .[dev,testing] --progress-bar off
-            cd dash/dash-renderer && renderer build && cd ../../ && python setup.py sdist && mv dist/* packages/
-            git clone --depth 1 https://github.com/plotly/dash-core-components.git
-            cd dash-core-components && npm ci && npm run build && python setup.py sdist && cd ..
 
   test-39: &test
     working_directory: ~/dash
@@ -273,27 +197,6 @@ jobs:
           command: npx percy finalize --all
           when: on_fail
 
-  test-36:
-    <<: *test
-    docker:
-      - image: circleci/python:3.6.13-stretch-node-browsers
-        auth:
-          username: dashautomation
-          password: $DASH_PAT_DOCKERHUB
-        environment:
-          PERCY_ENABLE: 0
-          PYVERSION: python36
-
-  test-27:
-    <<: *test
-    docker:
-      - image: circleci/python:2.7.18-stretch-node-browsers
-        auth:
-          username: dashautomation
-          password: $DASH_PAT_DOCKERHUB
-        environment:
-          PERCY_ENABLE: 0
-          PYVERSION: python27
 
 workflows:
   version: 2
@@ -321,21 +224,4 @@ workflows:
             tags:
               only: /v*/
 
-  python3.6:
-    jobs:
-      - lint-unit-36
-      - build-core-36
-      - build-misc-36
-      - test-36:
-          requires:
-            - build-core-36
-            - build-misc-36
-  python2.7:
-    jobs:
-      - lint-unit-27
-      - build-core-27
-      - build-misc-27
-      - test-27:
-          requires:
-            - build-core-27
-            - build-misc-27
+ 
