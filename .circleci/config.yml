@@ -12,8 +12,6 @@ jobs:
       - run: uname -a
       - run: echo "Hello, Arm!"
       
-      - restore_cache:
-          key: dep-{{ checksum ".circleci/config.yml" }}-{{ checksum "python39" }}-{{ checksum "requires-dev.txt" }}-{{ checksum "requires-install.txt" }}-{{ checksum "requires-testing.txt" }}
       - run:
           name: ️️🏗️ pip dev requirements
           command: |
@@ -28,25 +26,15 @@ jobs:
             git clone https://github.com/plotly/dash
             cd dash
             pip3 install -e . --no-cache-dir -r requires-install.txt -r requires-dev.txt -r requires-testing.txt --progress-bar off
-      - save_cache:
-          key: dep-{{ checksum ".circleci/config.yml" }}-{{ checksum "ver.txt" }}-{{ checksum "requires-dev.txt" }}-{{ checksum "requires-install.txt" }}-{{ checksum "requires-testing.txt" }}
-          paths:
-            - venv
-      - run:
-          name: 🌸 Python & JS Lint
-          command: |
-            . venv/bin/activate
+            
             set -eo pipefail
             cd dash/dash-renderer && renderer build && cd ../../
             pip3 install -e . --progress-bar off && pip3 list | grep dash
             npm install --production && npm run initialize
             npm run lint
-      - run:
-          name: 🐍 Python Unit Tests & ☕ JS Unit Tests
-          command: |
-            . venv/bin/activate
-            npm run citest.unit
-      
+            npm run citest.unit    
+
+
       
   lint-unit-39: &lint-unit
     working_directory: ~/dash
