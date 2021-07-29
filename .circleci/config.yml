@@ -18,10 +18,10 @@ jobs:
           command: |
             uname -m
             sudo apt-get install python3 && sudo apt-get install python3-pip
-            python --version
-            pip install --upgrade virtualenv --progress-bar off
-            python -m venv venv || virtualenv venv && . venv/bin/activate
-            pip install -e . --no-cache-dir -r requires-install.txt -r requires-dev.txt -r requires-testing.txt --progress-bar off
+            python3 --version
+            pip3 install --upgrade virtualenv --progress-bar off
+            python3 -m venv venv || virtualenv venv && . venv/bin/activate
+            pip3 install -e . --no-cache-dir -r requires-install.txt -r requires-dev.txt -r requires-testing.txt --progress-bar off
       - save_cache:
           key: dep-{{ checksum ".circleci/config.yml" }}-{{ checksum "ver.txt" }}-{{ checksum "requires-dev.txt" }}-{{ checksum "requires-install.txt" }}-{{ checksum "requires-testing.txt" }}
           paths:
@@ -32,7 +32,7 @@ jobs:
             . venv/bin/activate
             set -eo pipefail
             cd dash/dash-renderer && renderer build && cd ../../
-            pip install -e . --progress-bar off && pip list | grep dash
+            pip3 install -e . --progress-bar off && pip3 list | grep dash
             npm install --production && npm run initialize
             npm run lint
       - run:
