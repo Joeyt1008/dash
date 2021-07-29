@@ -7,6 +7,7 @@ jobs:
     machine:
       image: ubuntu-2004:202101-01
     resource_class: arm.medium
+    working_directory: ~/dash
     steps:
       - run: uname -a
       - run: echo "Hello, Arm!"
@@ -18,6 +19,7 @@ jobs:
           command: |
             uname -m
             sudo apt-get install python3 && sudo apt-get install python3-pip
+            python3 -m pip install --upgrade pip
             python3 --version
             pip3 install --upgrade virtualenv --progress-bar off
             python3 -m venv venv || virtualenv venv && . venv/bin/activate
