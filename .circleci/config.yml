@@ -17,7 +17,7 @@ jobs:
           name: ️️🏗️ pip dev requirements
           command: |
             uname -m
-            apt-get install python3-pip
+            sudo apt-get install python3-pip
             sudo pip install --upgrade virtualenv --progress-bar off
             python -m venv venv || virtualenv venv && . venv/bin/activate
             pip install -e . --no-cache-dir -r requires-install.txt -r requires-dev.txt -r requires-testing.txt --progress-bar off
